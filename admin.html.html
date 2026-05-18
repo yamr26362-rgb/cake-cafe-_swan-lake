@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAKE & CAFE - نظام التحكم الملكي في الوردية</title>
+    <style>
+        :root {
+            --bg-deep: #050811;
+            --bg-surface: rgba(13, 21, 37, 0.65);
+            --bg-card: #0c1322;
+            --gold-pure: #f39c12;
+            --gold-glow: #ffd700;
+            --neon-blue: #00d2ff;
+            --neon-green: #05df9d;
+            --neon-red: #ff3838;
+            --text-pure: #ffffff;
+            --text-secondary: #8fa0dd;
+            --glass-border: rgba(255, 255, 255, 0.04);
+        }
+
+        * { 
+            box-sizing: border-box; 
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body { 
+            background-color: var(--bg-deep); 
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(0, 210, 255, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(243, 156, 18, 0.05) 0%, transparent 40%),
+                linear-gradient(180deg, #050811 0%, #0a0f1d 100%);
+            margin: 0; padding: 30px; color: var(--text-pure); 
+            min-height: 100vh; overflow-x: hidden;
+        }
+
+        /* 🔐 شاشة الدخول */
+        .login-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: radial-gradient(circle at center, #0b1220 0%, #03050a 100%);
+            display: flex; justify-content: center; align-items: center; z-index: 10000;
+            backdrop-filter: blur(20px);
+        }
+        .login-box {
+            background: rgba(12, 19, 34, 0.8); padding: 50px 40px; border-radius: 28px; width: 90%; max-width: 440px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.8), 0 0 40px rgba(243, 156, 18, 0.1); 
+            text-align: center; border: 1px solid rgba(243, 156, 18, 0.2); backdrop-filter: blur(10px);
+        }
+        .login-box h3 { color: var(--gold-glow); margin-bottom: 30px; font-size: 26px; font-weight: 900; text-shadow: 0 0 15px rgba(255, 215, 0, 0.3); }
+        .login-input {
+            width: 100%; padding: 16px 20px; margin-bottom: 22px; border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 14px; font-size: 15px; outline: none; text-align: center; background: #060a12; color: white;
+        }
+        .login-input:focus { border-color: var(--neon-blue); box-shadow: 0 0 15px rgba(0, 210, 255, 0.25); background: #090f1c; }
+        .btn-login {
+            width: 100%; padding: 16px; background: linear-gradient(135deg, #f39c12, #f1c40f); color: #000;
+            border: none; border-radius: 14px; font-size: 16px; font-weight: 800; cursor: pointer; box-shadow: 0 5px 15px rgba(243, 156, 18, 0.3);
+        }
+        .btn-login:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(243, 156, 18, 0.5); }
+        .login-error { color: var(--neon-red); font-weight: bold; font-size: 14px; margin-top: 15px; display: none; }
+
+        .admin-wrapper { display: none; animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes slideUpFade { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 🪐 الهيدر */
+        .admin-header {
+            background: var(--bg-surface); backdrop-filter: blur(16px); padding: 22px 35px; border-radius: 24px;
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;
+            border: 1px solid var(--glass-border); box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+        }
+        .header-title-crypto { 
+            font-size: 26px; font-weight: 950; 
+            background: linear-gradient(90deg, #ffffff, var(--gold-glow), var(--neon-blue)); 
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        
+        .shift-interactive-card {
+            display: flex; align-items: center; gap: 15px; background: #060a12;
+            padding: 10px 20px; border-radius: 18px; border: 1px solid rgba(255,255,255,0.05);
+        }
+        .btn-toggle-shift-master {
+            background: linear-gradient(135deg, #2c3e50, #1a252f); color: #fff;
+            border: 1px solid rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 12px;
+            font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px;
+        }
+        .btn-toggle-shift-master:hover {
+            background: var(--gold-pure); color: #000; border-color: var(--gold-glow);
+            box-shadow: 0 0 15px rgba(243,156,18,0.4); transform: scale(1.03);
+        }
+
+        .shift-status-pill { font-size: 14px; font-weight: 900; padding: 6px 14px; border-radius: 10px; }
+        .shift-status-pill.day { background: rgba(243, 156, 18, 0.15); color: var(--gold-glow); border: 1px solid rgba(243,156,18,0.3); }
+        .shift-status-pill.night { background: rgba(0, 210, 255, 0.15); color: var(--neon-blue); border: 1px solid rgba(0, 210, 255, 0.3); }
+
+        /* 🎛️ شريط التحكم */
+        .control-ribbon { display: flex; gap: 20px; margin-bottom: 35px; align-items: center; flex-wrap: wrap; }
+        .btn-premium-action {
+            background: rgba(19, 30, 54, 0.6); border: 1px solid rgba(255,255,255,0.06); color: #fff;
+            padding: 15px 26px; border-radius: 16px; font-weight: 700; font-size: 14px; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 10px;
+        }
+        .btn-premium-action:hover { background: var(--text-pure); color: #000; border-color: var(--text-pure); transform: translateY(-2px); }
+        .btn-finance-style { background: linear-gradient(135deg, rgba(243,156,18,0.15), rgba(241,196,15,0.05)); border-color: rgba(243,156,18,0.3); color: var(--gold-glow); }
+        .btn-finance-style:hover { background: linear-gradient(135deg, var(--gold-pure), var(--gold-glow)); color: #000; box-shadow: 0 8px 25px rgba(243, 156, 18, 0.35); }
+        
+        .btn-logout-style { background: rgba(255, 56, 56, 0.1); border-color: rgba(255, 56, 56, 0.3); color: var(--neon-red); margin-right: auto; }
+        .btn-logout-style:hover { background: linear-gradient(135deg, var(--neon-red), #b31010); color: #fff; box-shadow: 0 8px 25px rgba(255, 56, 56, 0.3); }
+
+        select.premium-select {
+            padding: 15px 24px; font-size: 14px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.06);
+            font-weight: bold; color: white; cursor: pointer; background: #0c1322; outline: none;
+        }
+
+        /* 📋 شبكة الأوردرات */
+        .orders-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 30px; }
+        .order-card-flexible {
+            background: var(--bg-card); border-radius: 24px; padding: 28px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.02);
+            display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden;
+        }
+        .order-card-flexible.silver-member { border: 1px solid rgba(189, 195, 199, 0.25); background: linear-gradient(150deg, #0c1322 0%, #151f33 100%); }
+        .order-card-flexible.gold-member { border: 1px solid rgba(243, 156, 18, 0.35); background: linear-gradient(150deg, #0c1322 0%, #1d170b 100%); animation: goldPulse 4s infinite alternate; }
+        @keyframes goldPulse { 0% { box-shadow: 0 15px 35px rgba(0,0,0,0.4); } 100% { box-shadow: 0 15px 35px rgba(0,0,0,0.4), 0 0 30px rgba(243,156,18,0.15); border-color: var(--gold-glow); } }
+
+        .rank-tag-badge { font-size: 11px; padding: 6px 14px; border-radius: 10px; font-weight: 800; display: inline-block; }
+        .rank-tag-badge.silver { background: linear-gradient(135deg, #e2e8f0, #94a3b8); color: #0f172a; }
+        .rank-tag-badge.gold { background: linear-gradient(135deg, #f39c12, #ffd700); color: #000; }
+
+        .bill-alert-neon {
+            background: linear-gradient(90deg, #ff3838, #b31010); color: white; text-align: center;
+            font-weight: 900; padding: 14px; border-radius: 14px; font-size: 13px; margin-bottom: 22px;
+            box-shadow: 0 0 20px rgba(255, 56, 56, 0.4); animation: neonBlink 1s infinite alternate;
+        }
+        @keyframes neonBlink { from { opacity: 0.9; } to { opacity: 1; box-shadow: 0 0 25px rgba(255, 56, 56, 0.6); } }
+
+        .card-row-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .table-headline { font-size: 26px; font-weight: 900; color: #fff; }
+        .order-token-style { font-size: 13px; color: var(--neon-blue); font-weight: bold; background: rgba(0, 210, 255, 0.06); padding: 6px 14px; border-radius: 10px; border: 1px solid rgba(0, 210, 255, 0.15); }
+
+        .item-list-container { margin: 22px 0; background: #060a12; padding: 8px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.02); }
+        .item-data-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 14px; font-weight: 700; }
+        .item-data-row:last-child { border-bottom: none; }
+        .qty-pill-badge { background: rgba(0, 210, 255, 0.15); color: var(--neon-blue); padding: 4px 10px; border-radius: 8px; font-weight: 900; font-size: 12px; }
+
+        .total-bill-row { font-size: 24px; font-weight: 900; color: var(--gold-glow); margin: 22px 0 15px 0; border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 20px; text-align: left; }
+
+        .dual-buttons-row { display: flex; gap: 14px; margin-top: 15px; }
+        .btn-panel-action { flex: 1; padding: 15px; border: none; border-radius: 14px; font-weight: 800; font-size: 14px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; }
+        .btn-panel-action.done-prep { background: var(--neon-green); color: #000; }
+        .btn-panel-action.done-cash { background: var(--neon-red); color: white; }
+
+        /* 🎰 الأدرج الجانبية */
+        .premium-drawer {
+            position: fixed; top: 0; width: 370px; height: 100%; background: rgba(10, 15, 28, 0.85); box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            z-index: 9999; padding: 35px 30px; overflow-y: auto; border: 1px solid rgba(255, 255, 255, 0.03); color: white; backdrop-filter: blur(25px);
+        }
+        #financeDrawer { right: -390px; border-left: 2px solid var(--gold-pure); }
+        #financeDrawer.open { right: 0; }
+        #reportsDrawer { left: -390px; border-right: 2px solid var(--neon-blue); }
+        #reportsDrawer.open { left: 0; }
+
+        .drawer-header-top { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid rgba(255,255,255,0.05); padding-bottom: 20px; margin-bottom: 30px; }
+        .btn-close-x { background: #162238; color: white; border: none; width: 38px; height: 38px; border-radius: 50%; cursor: pointer; font-weight: bold; }
+        
+        .drawer-finance-box { display: flex; flex-direction: column; gap: 20px; margin-bottom: 30px; }
+        .sub-matrix-card { background: #0d1525; padding: 22px; border-radius: 18px; border: 1px solid rgba(255,255,255,0.03); }
+        .sub-matrix-card p { margin: 0 0 8px 0; font-size: 12px; color: var(--text-secondary); font-weight: bold; }
+        .sub-matrix-card h3 { margin: 0; font-size: 24px; font-weight: 900; color: #fff; }
+
+        .top-item-badge-box { background: rgba(243, 156, 18, 0.06); border: 1px dashed rgba(243, 156, 18, 0.3); padding: 18px; border-radius: 16px; text-align: center; }
+
+        .side-table { width: 100%; border-collapse: collapse; text-align: right; }
+        .side-table th { color: var(--neon-blue); border-bottom: 2px solid rgba(255,255,255,0.05); padding: 12px 5px; font-size: 13px; }
+        .side-table td { padding: 15px 5px; border-bottom: 1px solid rgba(255,255,255,0.03); color: var(--text-pure); font-size: 13px; }
+        .fav-food-text { display: block; font-size: 11px; color: var(--gold-glow); margin-top: 6px; }
+    </style>
+</head>
+<body>
+
+<audio id="orderBell" src="https://assets.mixkit.co/active_storage/sfx/911/911-200.wav" preload="auto"></audio>
+
+<div class="login-overlay" id="loginOverlay">
+    <div class="login-box">
+        <h3>👑 نظام الإدارة المالية والتشغيلية</h3>
+        <input type="email" id="emailInput" class="login-input" placeholder="أدخل البريد الإلكتروني المسجل">
+        <input type="password" id="passwordInput" class="login-input" placeholder="أدخل كلمة المرور">
+        <button class="btn-login" id="loginBtn" onclick="loginWithFirebase()">دخول النظام الملكي</button>
+        <div class="login-error" id="loginErrorMsg">بيانات الدخول غير صحيحة أو غير مسجلة! ❌</div>
+    </div>
+</div>
+
+<div class="premium-drawer" id="financeDrawer">
+    <div class="drawer-header-top">
+        <h3 style="margin:0; font-weight:900; color:var(--gold-glow); font-size: 20px;">📊 الحسابات والإيرادات</h3>
+        <button class="btn-close-x" onclick="toggleFinanceDrawer(false)">×</button>
+    </div>
+    
+    <div class="drawer-finance-box">
+        <div class="sub-matrix-card" style="border-right: 4px solid var(--neon-blue);">
+            <p>إيراد الشيفت الحالي 🕒</p>
+            <h3 id="shiftRevenueField" style="color: var(--neon-blue);">0 ج.م</h3>
+        </div>
+        
+        <div class="top-item-badge-box">
+            <p style="margin:0 0 6px 0; font-size:12px; font-weight:bold; color:var(--text-secondary);">🔥 الأكثر طلباً this الشيفت</p>
+            <strong id="topShiftItemField" style="font-size:15px; color:var(--gold-glow);">جاري التحليل... 📊</strong>
+        </div>
+
+        <div class="sub-matrix-card" style="border-right: 4px solid var(--gold-pure);">
+            <p>إجمالي اليوم كلو (كل الشيفتات) 📅</p>
+            <h3 id="dailyRevenueField" style="color: var(--gold-glow);">0 ج.م</h3>
+        </div>
+        <div class="sub-matrix-card" style="border-right: 4px solid var(--neon-green);">
+            <p>المبيعات الأسبوعية (آخر 7 أيام) 📊</p>
+            <h3 id="weeklyRevenueField" style="color: var(--neon-green);">0 ج.م</h3>
+        </div>
+        <div class="sub-matrix-card" style="border-right: 4px solid #9b59b6;">
+            <p>الحصيلة الشهرية الكلية 💰</p>
+            <h3 id="monthlyRevenueField" style="color: #af7ac5;">0 ج.م</h3>
+        </div>
+    </div>
+</div>
+
+<div class="premium-drawer" id="reportsDrawer">
+    <div class="drawer-header-top">
+        <h3 style="margin:0; font-weight:900; color:var(--neon-blue); font-size: 20px;">🏅 قائمة ومزاج العملاء</h3>
+        <button class="btn-close-x" onclick="toggleReportsDrawer(false)">×</button>
+    </div>
+    <table class="side-table">
+        <thead>
+            <tr><th>👤 العميل / المزاج المفضل</th><th style="text-align:center;">📦 طلبات</th><th>🏅 الرتبة</th></tr>
+        </thead>
+        <tbody id="customersTableBody">
+            <tr><td colspan="3" style="text-align:center; color:var(--text-secondary);">جاري استرجاع البيانات الحية...</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="admin-wrapper" id="adminMainWrapper">
+    
+    <div class="admin-header">
+        <div class="header-title-crypto">CAKE & CAFE — PREMIUM CONTROL</div>
+        
+        <div class="shift-interactive-card">
+            <span id="shiftStatusIndicator" class="shift-status-pill day">☀️ الوردية: صباحي</span>
+            <button class="btn-toggle-shift-master" onclick="toggleAndLiquidateShiftMaster()">
+                🔄 نقل وتصفير الوردية
+            </button>
+        </div>
+    </div>
+
+    <div class="control-ribbon">
+        <button class="btn-premium-action btn-finance-style" onclick="toggleFinanceDrawer(true)">📊 حسابات وإيرادات الشيفت</button>
+        <button class="btn-premium-action" onclick="toggleReportsDrawer(true)">🎖 قائمة ومزاج العملاء</button>
+        
+        <select id="branchSelect" class="premium-select" onchange="loadOrdersAndFinancialsLive()">
+            <option value="main">manager</option>
+            <option value="swan_lake">swan lake</option>
+            <option value="pyramids">pyramids</option>
+        </select>
+        
+        <button class="btn-premium-action btn-logout-style" onclick="logoutFromFirebaseMaster()">🚪 تسجيل الخروج</button>
+    </div>
+
+    <div class="orders-grid" id="ordersGridContainer">
+        <p style="text-align: center; grid-column: 1/-1; color: var(--text-secondary); padding: 50px; font-weight:600;">بانتظار مزامنة داتا الفايربيز الحية... 🔄</p>
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyDBuBOcY9mbCXZIVIhkTjOhaor4VsrTPx8",
+        authDomain: "scan-order-system.firebaseapp.com",
+        projectId: "scan-order-system",
+        storageBucket: "scan-order-system.firebasestorage.app",
+        messagingSenderId: "1066014113516",
+        appId: "1:1066014113516:web:61ef0f2dc366b0e9d8afc9",
+        databaseURL: "https://scan-order-system-default-rtdb.firebaseio.com"
+    };
+    
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    const auth = firebase.auth();
+
+    let localOrdersCounter = 0;
+    let globalActiveOrders = {};
+    let customersDataMap = {};
+    let currentShiftGlobalString = "صباحي"; 
+    
+    // متغيرات الصلاحيات العالمية
+    let currentUserRole = "cashier";
+    let currentUserBranch = "main";
+
+    // 📡 الحارس الحي الفعلي لجلسة المستخدم (Firebase Auth Observer)
+    auth.onAuthStateChanged((user) => {
+        if (user) {
+            // 🔍 خطوة الصياعة: بنروح للفايربيز نسأله عن صلاحية وفرع الـ UID ده حياً قبل فتح الصفحة
+            database.ref('users/' + user.uid).once('value', (snapshot) => {
+                const userData = snapshot.val();
+                
+                if (userData) {
+                    currentUserRole = userData.role; // رتبته (super_admin أو cashier)
+                    
+                    if (currentUserRole === "super_admin") {
+                        // 👑 لو المدير العام: بنسيب له قائمة الفروع ظاهرة ويقلب براحته
+                        document.getElementById('branchSelect').style.display = "inline-block";
+                        document.querySelector('.header-title-crypto').innerText = `CAKE & CAFE — لوحة الإدارة العامة`;
+                    } else {
+                        // 💳 لو كاشير فرع: بنخفي قائمة اختيار الفروع تماماً عشان ميعرفش يتنقل!
+                        document.getElementById('branchSelect').style.display = "none";
+                        
+                        // بنثبت قيمة القائمة على الفرع بتاعه الإجباري المسجل في الفايربيز
+                        currentUserBranch = userData.branch || "main";
+                        document.getElementById('branchSelect').value = currentUserBranch;
+                        
+                        // تحديث العنوان باسم الفرع بتاعه
+                        document.querySelector('.header-title-crypto').innerText = `CAKE & CAFE — لوحة فرع: ${currentUserBranch}`;
+                    }
+
+                    // إظهار اللوحة وإخفاء شاشة الدخول
+                    document.getElementById('loginOverlay').style.display = "none";
+                    document.getElementById('adminMainWrapper').style.display = "block";
+                    
+                    // تشغيل المزامنة الحية
+                    loadInitialCustomerMetrics();
+                } else {
+                    // لو الحساب مش مسجل له داتا صلاحيات في الداتابيز
+                    alert("⚠️ حسابك مسجل في الـ Auth ولكن رتبتك وفروعك غير مدرجة في الداتابيز (عقدة users)!");
+                    auth.signOut();
+                }
+            });
+        } else {
+            // لو مش مسجل دخول أو عمل Logout، نقفل اللوحة فوراً ونعرض شاشة الـ Login
+            document.getElementById('adminMainWrapper').style.display = "none";
+            document.getElementById('loginOverlay').style.display = "flex";
+            stopLiveListeners();
+        }
+    });
+
+    // دالة لتوقيف المستمعين عند الخروج لضمان عدم تسريب البيانات
+    function stopLiveListeners() {
+        database.ref('customers').off();
+        const branch = document.getElementById('branchSelect').value;
+        database.ref('branches/' + branch + '/checkpoints/current_active_shift').off();
+        database.ref('branches/' + branch + '/archive').off();
+        database.ref('branches/' + branch + '/orders').off();
+    }
+
+    // 🔑 دالة تسجيل الدخول الحقيقية عن طريق الفايربيز سيرفر
+    function loginWithFirebase() {
+        const email = document.getElementById('emailInput').value.trim();
+        const password = document.getElementById('passwordInput').value.trim();
+        const errorMsg = document.getElementById('loginErrorMsg');
+        const loginBtn = document.getElementById('loginBtn');
+
+        if (!email || !password) {
+            errorMsg.innerText = "برجاء كتابة الإيميل والباسورد أولاً! ⚠️";
+            errorMsg.style.display = "block";
+            return;
+        }
+
+        loginBtn.innerText = "جاري التحقق ... 🔄";
+        loginBtn.disabled = true;
+
+        auth.signInWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+            errorMsg.style.display = "none";
+            loginBtn.innerText = "دخول النظام الملكي";
+            loginBtn.disabled = false;
+        })
+        .catch((error) => {
+            console.error("Firebase Auth Error:", error.message);
+            errorMsg.innerText = "خطأ في بيانات الدخول! تأكد من الإيميل والباسورد ❌";
+            errorMsg.style.display = "block";
+            loginBtn.innerText = "دخول النظام الملوكي";
+            loginBtn.disabled = false;
+        });
+    }
+
+    // 🚪 دالة تسجيل الخروج الفعلي من الفايربيز (Firebase SignOut)
+    function logoutFromFirebaseMaster() {
+        if(confirm("هل تريد تسجيل الخروج الحقيقي وإنهاء جلسة العمل الحالية؟ 🚪")) {
+            auth.signOut().then(() => {
+                alert("تم تسجيل الخروج وتأمين لوحة التحكم بنجاح! 👋");
+            }).catch((error) => {
+                alert("حدث خطأ أثناء تسجيل الخروج: " + error.message);
+            });
+        }
+    }
+
+    function loadInitialCustomerMetrics() {
+        // فك أي مستمع قديم قبل البدء لمنع التداخل
+        database.ref('customers').off();
+        
+        database.ref('customers').on('value', (snapshot) => {
+            customersDataMap = snapshot.val() || {};
+            
+            const branch = document.getElementById('branchSelect').value;
+            
+            // إلغاء مستمع الشفت القديم لو موجود
+            database.ref('branches/' + branch + '/checkpoints/current_active_shift').off();
+            
+            database.ref('branches/' + branch + '/checkpoints/current_active_shift').on('value', (shiftSnap) => {
+                if(shiftSnap.exists()) {
+                    currentShiftGlobalString = shiftSnap.val();
+                } else {
+                    currentShiftGlobalString = "صباحي";
+                }
+                updateShiftUIOnly();
+                loadOrdersAndFinancialsLive();
+            });
+        });
+    }
+
+    function updateShiftUIOnly() {
+        const pill = document.getElementById('shiftStatusIndicator');
+        if(currentShiftGlobalString === "صباحي") {
+            pill.innerText = "☀️ الوردية: صباحي";
+            pill.className = "shift-status-pill day";
+        } else {
+            pill.innerText = "🌙 الوردية: مسائي";
+            pill.className = "shift-status-pill night";
+        }
+    }
+
+    function toggleAndLiquidateShiftMaster() {
+        const branch = document.getElementById('branchSelect').value;
+        const targetShift = (currentShiftGlobalString === "صباحي") ? "مسائي" : "صباحي";
+        
+        let confirmMsg = `🔄 هل تريد إغلاق الوردية الـ (${currentShiftGlobalString}) وتلسيم العهدة للوردية الـ (${targetShift})؟`;
+        
+        if(currentShiftGlobalString === "مسائي" && targetShift === "صباحي") {
+            confirmMsg += `\n\n⚠️ انتبه يا فنان: بما أنك تنقل من (مسائي ⬅️ صباحي)، فهذا يعني نهاية يوم العمل بالكامل! السيستم هيصفر "إجمالي اليوم كلو" فوراً لبدء يوم جديد ونظيف.`;
+        }
+
+        if(confirm(confirmMsg)) {
+            const nowTime = Date.now();
+            const updates = {};
+
+            updates['branches/' + branch + '/checkpoints/current_active_shift'] = targetShift;
+            updates['branches/' + branch + '/checkpoints/shift_checkpoint'] = nowTime;
+
+            if(currentShiftGlobalString === "مسائي" && targetShift === "صباحي") {
+                updates['branches/' + branch + '/checkpoints/daily_checkpoint'] = nowTime;
+            }
+
+            database.ref().update(updates).then(() => {
+                alert(`🚀 تم ترحيل الوردية بنجاح بنظام الكافيهات المطور!\nالوردية الوشيكة الآن: ${targetShift === "صباحي" ? "☀️ صباحي" : "🌙 مسائي"}`);
+            });
+        }
+    }
+
+    function loadOrdersAndFinancialsLive() {
+        const branch = document.getElementById('branchSelect').value;
+        
+        // تنظيف المستمعين للفروع القديمة قبل ربط الجديدة
+        database.ref('branches/' + branch + '/archive').off();
+        database.ref('branches/' + branch + '/orders').off();
+        
+        database.ref('branches/' + branch + '/archive').on('value', (snapshot) => {
+            const archiveData = snapshot.val() || {};
+            calculateFinancialDashboard(archiveData, branch);
+            calculateCustomerPreferences(archiveData);
+        });
+
+        database.ref('branches/' + branch + '/orders').on('value', (snapshot) => {
+            const container = document.getElementById('ordersGridContainer');
+            container.innerHTML = "";
+
+            const orders = snapshot.val() || {};
+            globalActiveOrders = orders;
+
+            const count = Object.keys(orders).length;
+            if (count > localOrdersCounter && localOrdersCounter !== 0) {
+                document.getElementById('orderBell').play().catch(()=>{});
+            }
+            localOrdersCounter = count;
+
+            if(count === 0) {
+                container.innerHTML = `<p style="text-align: center; grid-column: 1/-1; color: var(--text-secondary); padding: 60px; font-weight: bold; font-size:15px;">🪑 لا يوجد أوردرات نشطة في الصالة حالياً.</p>`;
+                return;
+            }
+
+            const renderedSet = new Set();
+
+            Object.keys(orders).forEach(key => {
+                const order = orders[key];
+                const realId = order.orderId || key;
+
+                if(renderedSet.has(realId)) return;
+                renderedSet.add(realId);
+
+                let itemsHtml = "";
+                if(order.items && Array.isArray(order.items)) {
+                    order.items.forEach(item => {
+                        itemsHtml += `
+                            <div class="item-data-row">
+                                <span>☕ ${item.name}</span>
+                                <span class="qty-pill-badge">x${item.qty}</span>
+                            </div>`;
+                    });
+                }
+
+                const card = document.createElement('div');
+                let cName = order.customerName || "زبون عابر";
+                let totalVisits = 1;
+                if(customersDataMap[cName]) {
+                    totalVisits = customersDataMap[cName].totalOrders || 1;
+                }
+
+                let badgeHtml = "";
+                if(totalVisits >= 10) {
+                    card.className = "order-card-flexible gold-member";
+                    badgeHtml = `<span class="rank-tag-badge gold">👑 ذهبي ملكي (${totalVisits} طلب)</span>`;
+                } else if(totalVisits >= 5) {
+                    card.className = "order-card-flexible silver-member";
+                    badgeHtml = `<span class="rank-tag-badge silver">🥈 فضي فخم (${totalVisits} طلب)</span>`;
+                } else {
+                    card.className = "order-card-flexible";
+                    badgeHtml = `<span class="rank-tag-badge" style="background:#131e36; color:#fff;">👤 عميل جديد</span>`;
+                }
+
+                let billBanner = order.billRequested ? `<div class="bill-alert-neon">💸 العميل يطلب الفاتورة الحية الآن!</div>` : '';
+                let oTime = order.time || 'الآن';
+
+                card.innerHTML = `
+                    <div>
+                        ${billBanner}
+                        <div class="card-row-top">
+                            <span class="table-headline">🪑 طاولة ${order.tableNum || '??'}</span>
+                            <span class="order-token-style">رقم الأوردر #${realId}</span>
+                        </div>
+                        <div class="info-line">👤 الاسم: <strong>${cName}</strong> ${badgeHtml}</div>
+                        <div class="info-line">🕒 الوقت: <strong>${oTime}</strong></div>
+                        <div class="info-line" style="color:var(--neon-blue); font-weight:bold;">⚡ الحالة: ${order.status || 'معلق بالانتظار'}</div>
+
+                        <div class="item-list-container">
+                            ${itemsHtml}
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="total-bill-row">صافي الحساب: ${order.totalPrice || 0} ج.م</div>
+                        <div class="dual-buttons-row">
+                            <button class="btn-panel-action done-prep" onclick="markOrderReady('${branch}', '${key}')">✔ تم الاستلام</button>
+                            <button class="btn-panel-action done-cash" onclick="liquidateOrderFinal('${branch}', '${key}')">💸 تم الحساب</button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        });
+    }
+
+    function calculateFinancialDashboard(archive, branch) {
+        let shiftTotal = 0;
+        let dailyTotal = 0;
+        let weeklyTotal = 0;
+        let monthlyTotal = 0;
+
+        let shiftItemsMap = {};
+
+        const now = new Date();
+        const startOfTodayInitial = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+        const startOfWeekly = startOfTodayInitial - (7 * 24 * 60 * 60 * 1000);
+        const startOfMonthly = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+
+        database.ref('branches/' + branch + '/checkpoints').once('value', (snapCheck) => {
+            const checkData = snapCheck.val() || {};
+            const lastShiftCheck = checkData.shift_checkpoint || 0;
+            const lastDailyCheck = checkData.daily_checkpoint || startOfTodayInitial;
+
+            Object.keys(archive).forEach(k => {
+                const rec = archive[k];
+                const price = parseFloat(rec.totalPrice || 0);
+                const timestamp = rec.timestamp || startOfTodayInitial;
+
+                if(timestamp >= lastShiftCheck) {
+                    shiftTotal += price;
+                    if(rec.items && Array.isArray(rec.items)) {
+                        rec.items.forEach(it => {
+                            shiftItemsMap[it.name] = (shiftItemsMap[it.name] || 0) + parseInt(it.qty || 1);
+                        });
+                    }
+                }
+                
+                if(timestamp >= lastDailyCheck) {
+                    dailyTotal += price;
+                }
+                
+                if(timestamp >= startOfWeekly) weeklyTotal += price;
+                if(timestamp >= startOfMonthly) monthlyTotal += price;
+            });
+
+            document.getElementById('shiftRevenueField').innerText = shiftTotal + " ج.م";
+            document.getElementById('dailyRevenueField').innerText = dailyTotal + " ج.م";
+            document.getElementById('weeklyRevenueField').innerText = weeklyTotal + " ج.م";
+            document.getElementById('monthlyRevenueField').innerText = monthlyTotal + " ج.م";
+
+            let topItemName = "لا مبيعات بالشيفت";
+            let maxQty = 0;
+            Object.keys(shiftItemsMap).forEach(name => {
+                if(shiftItemsMap[name] > maxQty) {
+                    maxQty = shiftItemsMap[name];
+                    topItemName = `${name} (${maxQty} مرات)`;
+                }
+            });
+            document.getElementById('topShiftItemField').innerText = topItemName;
+        });
+    }
+
+    function calculateCustomerPreferences(archive) {
+        let customerFavMap = {};
+
+        Object.keys(archive).forEach(k => {
+            const rec = archive[k];
+            const cName = rec.customerName || "زبون عابر";
+            if(cName === "زبون عابر") return;
+
+            if(!customerFavMap[cName]) customerFavMap[cName] = {};
+
+            if(rec.items && Array.isArray(rec.items)) {
+                rec.items.forEach(it => {
+                    customerFavMap[cName][it.name] = (customerFavMap[cName][it.name] || 0) + parseInt(it.qty || 1);
+                });
+            }
+        });
+
+        const tbody = document.getElementById('customersTableBody');
+        tbody.innerHTML = "";
+
+        const keys = Object.keys(customersDataMap);
+        if(keys.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:var(--text-secondary);">لا يوجد عملاء مسجلين حالياً.</td></tr>`;
+            return;
+        }
+
+        keys.forEach(name => {
+            const c = customersDataMap[name];
+            const total = c.totalOrders || 1;
+            
+            let favoriteItem = "تذوق أولي جديد ☕";
+            let maxCount = 0;
+            if(customerFavMap[name]) {
+                Object.keys(customerFavMap[name]).forEach(prod => {
+                    if(customerFavMap[name][prod] > maxCount) {
+                        maxCount = customerFavMap[name][prod];
+                        favoriteItem = prod;
+                    }
+                });
+            }
+
+            let levelBadge = `<span style="color:var(--text-secondary); font-weight:bold;">عادي</span>`;
+            if(total >= 10) levelBadge = `<strong style="color:var(--gold-glow)">👑 دهبي ملكي</strong>`;
+            else if(total >= 5) levelBadge = `<strong style="color:#bdc3c7">🥈 فضي فخم</strong>`;
+
+            tbody.innerHTML += `
+                <tr>
+                    <td>
+                        👤 <strong>${name}</strong>
+                        <span class="fav-food-text">❤️ المفضل: ${favoriteItem}</span>
+                    </td>
+                    <td style="text-align:center; font-weight:bold; color:var(--neon-blue); font-size:14px;">${total}</td>
+                    <td>${levelBadge}</td>
+                </tr>`;
+        });
+    }
+
+    function markOrderReady(branch, firebaseKey) {
+        const orderData = globalActiveOrders[firebaseKey];
+        if(!orderData) return;
+        const cleanId = orderData.orderId || firebaseKey;
+
+        const updates = {};
+        const statusText = "جاهز للتسليم ☕✨";
+        updates['orders/' + firebaseKey + '/status'] = statusText;
+        updates['orders/' + cleanId + '/status'] = statusText;
+        updates['orders/ORD-' + cleanId + '/status'] = statusText;
+        updates['branches/' + branch + '/orders/' + firebaseKey + '/status'] = statusText;
+        updates['branches/' + branch + '/orders/' + cleanId + '/status'] = statusText;
+        updates['branches/' + branch + '/orders/ORD-' + cleanId + '/status'] = statusText;
+
+        database.ref().update(updates).then(() => {
+            alert("تم إرسال إشارة جاهزية الأوردر للزبون في الصالة! ✔");
+        });
+    }
+
+    function liquidateOrderFinal(branch, firebaseKey) {
+        const orderData = globalActiveOrders[firebaseKey];
+        if(!orderData) return;
+
+        const tNum = orderData.tableNum;
+        const cleanOrderId = orderData.orderId || firebaseKey;
+        const cName = orderData.customerName || "زبون عابر";
+
+        if(confirm(`هل تم استلام كامل المبلغ (${orderData.totalPrice} ج.م) لطاولة رقم ${tNum} وتريد ترحيل الأوردر？`)) {
+            
+            database.ref('orders/' + firebaseKey).remove();
+            database.ref('orders/' + cleanOrderId).remove();
+            database.ref('orders/ORD-' + cleanOrderId).remove();
+            database.ref('branches/' + branch + '/orders/' + firebaseKey).remove();
+            database.ref('branches/' + branch + '/orders/' + cleanOrderId).remove();
+            database.ref('branches/' + branch + '/orders/ORD-' + cleanOrderId).remove();
+
+            if(tNum) {
+                database.ref('branches/' + branch + '/tables/' + tNum).set({
+                    status: "empty", currentOrder: null, orderId: null
+                });
+            }
+
+            if(cName !== "زبون عابر") {
+                const customerRef = database.ref('customers/' + cName);
+                customerRef.once('value').then((snap) => {
+                    let cInfo = snap.val() || { totalOrders: 0 };
+                    let currentCount = parseInt(cInfo.totalOrders || 0) + 1;
+                    customerRef.set({
+                        totalOrders: currentCount,
+                        lastVisit: new Date().toLocaleDateString('ar-EG') + " " + new Date().toLocaleTimeString('ar-EG')
+                    });
+                });
+            }
+
+            const archiveRef = database.ref('branches/' + branch + '/archive').push();
+            archiveRef.set({
+                orderId: cleanOrderId,
+                customerName: cName,
+                totalPrice: parseFloat(orderData.totalPrice || 0),
+                items: orderData.items || [],
+                shiftType: currentShiftGlobalString,
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            });
+
+            alert(`تم الحساب وإخلاء الطاولة رقم ${tNum} بنجاح، وترحيل الأرباح للتحليلات الذكية! 💸🪑`);
+        }
+    }
+
+    function toggleFinanceDrawer(open) { document.getElementById('financeDrawer').classList.toggle('open', open); }
+    function toggleReportsDrawer(open) { document.getElementById('reportsDrawer').classList.toggle('open', open); }
+</script>
+</body>
+</html>

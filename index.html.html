@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAKE & CAFE - المنيو الإلكتروني</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #e67e22;
+            --bg-color: #f1f2f6;
+            --card-bg: #ffffff;
+            --text-main: #2d3436;
+            --text-muted: #7f8c8d;
+        }
+
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-color); margin: 0; padding: 0; color: var(--text-main); }
+
+        .header {
+            background: linear-gradient(135deg, #1e272e, #2c3e50);
+            color: white; padding: 30px 20px; text-align: center;
+            border-radius: 0 0 25px 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .header h1 { margin: 0; font-size: 26px; font-weight: 800; }
+        .header p { margin: 5px 0 0 0; font-size: 14px; opacity: 0.9; }
+
+        .info-bar {
+            display: flex; justify-content: space-between; background: white;
+            margin: -15px 20px 20px 20px; padding: 12px 15px; border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05); font-weight: bold; font-size: 13px;
+        }
+
+        /* شاشة الدخول والتسجيل (Modal) */
+        .table-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); display: flex; justify-content: center;
+            align-items: center; z-index: 9999; backdrop-filter: blur(5px);
+        }
+        .modal-content {
+            background: white; padding: 30px 25px; border-radius: 20px;
+            width: 85%; max-width: 400px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .modal-content h3 { margin-top: 0; color: var(--primary-color); font-size: 20px; }
+        .modal-content input {
+            width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #dfe4ea;
+            border-radius: 10px; font-size: 15px; text-align: center; font-weight: 600;
+        }
+        .modal-content input:focus { border-color: var(--accent-color); outline: none; }
+        .modal-content button {
+            width: 100%; padding: 12px; background: var(--accent-color); color: white;
+            border: none; border-radius: 10px; font-size: 16px; font-weight: bold;
+            cursor: pointer; transition: 0.2s; margin-top: 10px;
+        }
+        .modal-content button:hover { background: #d35400; }
+
+        /* قائمة الأصناف المتطورة */
+        .categories { display: flex; gap: 10px; overflow-x: auto; padding: 10px 20px; scrollbar-width: none; }
+        .categories::-webkit-scrollbar { display: none; }
+        .cat-btn {
+            background: white; border: 1px solid #dfe4ea; padding: 8px 16px;
+            border-radius: 20px; font-weight: bold; cursor: pointer; white-space: nowrap;
+        }
+        .cat-btn.active { background: var(--primary-color); color: white; border-color: var(--primary-color); }
+
+        .menu-container { padding: 10px 20px 100px 20px; display: grid; grid-template-columns: 1fr; gap: 15px; }
+        
+        /* كارت المنتج مع الصورة */
+        .product-card {
+            background: white; border-radius: 15px; padding: 12px; display: flex;
+            align-items: center; justify-content: space-between; box-shadow: 0 4px 8px rgba(0,0,0,0.03);
+            gap: 12px;
+        }
+        .product-info-wrapper { display: flex; align-items: center; gap: 12px; flex: 1; }
+        
+        .product-img {
+            width: 70px; height: 70px; border-radius: 12px; object-fit: cover;
+            background-color: #f1f2f6; box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+        
+        .product-details h4 { margin: 0 0 5px 0; font-size: 15px; }
+        .product-details p { margin: 0; color: var(--accent-color); font-weight: bold; font-size: 14px; }
+
+        .counter-box { display: flex; align-items: center; gap: 10px; }
+        .counter-btn {
+            width: 32px; height: 32px; border-radius: 50%; border: none;
+            font-size: 18px; font-weight: bold; cursor: pointer; background: #f1f2f6;
+        }
+        .counter-btn.plus { background: #2ecc71; color: white; }
+        .counter-btn.minus { background: #e74c3c; color: white; }
+        .qty-val { font-weight: bold; font-size: 16px; min-width: 15px; text-align: center; }
+
+        /* بار الطلب السفلي */
+        .footer-bar {
+            position: fixed; bottom: 0; left: 0; width: 100%; background: white;
+            padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.1); border-radius: 20px 20px 0 0; z-index: 999;
+        }
+        .send-btn {
+            background: var(--primary-color); color: white; border: none; padding: 12px 25px;
+            border-radius: 12px; font-weight: bold; font-size: 15px; cursor: pointer;
+        }
+
+        /* شاشة التتبع لايف */
+        .tracking-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: white; display: none; flex-direction: column; align-items: center;
+            justify-content: center; z-index: 10000; padding: 20px; text-align: center;
+        }
+        .status-badge {
+            background: #ffeaa7; color: #d63031; font-weight: bold;
+            padding: 10px 20px; border-radius: 20px; font-size: 18px; margin: 20px 0;
+        }
+        .bill-btn {
+            background: #e74c3c; color: white; border: none;
+            padding: 12px 30px; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="table-modal" id="tableModal">
+    <div class="modal-content">
+        <h3>أهلاً بك في CAKE & CAFE 👋</h3>
+        
+        <div id="newUserFields">
+            <p id="modalHintText" style="color: var(--text-muted); font-size: 14px;">الرجاء إدخال بياناتك لبدء الطلب</p>
+            <input type="text" id="userNameInput" placeholder="اكتب اسمك الثنائي">
+        </div>
+
+        <div id="returningUserFields" style="display: none; margin-bottom: 15px;">
+            <h4 style="color: var(--primary-color); margin: 0 0 5px 0;">💚 منورنا تاني يا <span id="savedCustomerName" style="color: var(--accent-color);"></span></h4>
+            <p style="color: var(--text-muted); font-size: 14px; margin: 0;">اكتب رقم طاولة اليوم وابدأ طلبك فوراً</p>
+        </div>
+
+        <input type="number" id="tableInput" min="1" max="50" placeholder="رقم الطاولة الحالي (1 - 50)">
+        <button onclick="saveCustomerData()">دخول واستعراض المنيو ☕</button>
+    </div>
+</div>
+
+<div class="header">
+    <h1>CAKE & CAFE ✨</h1>
+    <p>أقوى تجربة قهوة واكلات في مصر</p>
+</div>
+
+<div class="info-bar">
+    <span id="branchDisplay">🏢 الفرع: main</span>
+    <span id="tableDisplay">📌 طاولة: لم تُحدد بعد</span>
+</div>
+
+<div class="categories">
+    <button class="cat-btn active" onclick="filterCategory('all', this)">الكل</button>
+    <button class="cat-btn" onclick="filterCategory('coffee', this)">القهوة والمشروبات</button>
+    <button class="cat-btn" onclick="filterCategory('cake', this)">الحلويات والكب كيك</button>
+    <button class="cat-btn" onclick="filterCategory('sandwich', this)">السندوتشات</button>
+    <button class="cat-btn" onclick="filterCategory('pasta', this)">الباستا</button>
+    <button class="cat-btn" onclick="filterCategory('soup', this)">الشوربة</button>
+</div>
+
+<div class="menu-container" id="menuGrid">
+    <div class="product-card" data-id="p1" data-category="coffee" data-name="إسبريسو سينجل" data-price="40">
+        <div class="product-info-wrapper">
+            <img src="https://images.unsplash.com/photo-1510707513156-46c49f8098a1?w=150" alt="إسبريسو سينجل" class="product-img">
+            <div class="product-details"><h4>إسبريسو سينجل</h4><p>40 ج.م</p></div>
+        </div>
+        <div class="counter-box"><button class="counter-btn minus" onclick="changeQty('p1', -1)">-</button><span class="qty-val" id="qty-p1">0</span><button class="counter-btn plus" onclick="changeQty('p1', 1)">+</button></div>
+    </div>
+    <div class="product-card" data-id="p2" data-category="coffee" data-name="لاتيه ميكاتو" data-price="65">
+        <div class="product-info-wrapper">
+            <img src="https://images.unsplash.com/photo-1570968915860-54d5c301fc9f?w=150" alt="لاتيه ميكاتو" class="product-img">
+            <div class="product-details"><h4>لاتيه ميكاتو</h4><p>65 ج.م</p></div>
+        </div>
+        <div class="counter-box"><button class="counter-btn minus" onclick="changeQty('p2', -1)">-</button><span class="qty-val" id="qty-p2">0</span><button class="counter-btn plus" onclick="changeQty('p2', 1)">+</button></div>
+    </div>
+    <div class="product-card" data-id="p3" data-category="coffee" data-name="كابتشينو فوم" data-price="60">
+        <div class="product-info-wrapper">
+            <img src="https://images.unsplash.com/photo-1534778101976-62847782c213?w=150" alt="كابتشينو فوم" class="product-img">
+            <div class="product-details"><h4>كابتشينو فوم</h4><p>60 ج.م</p></div>
+        </div>
+        <div class="counter-box"><button class="counter-btn minus" onclick="changeQty('p3', -1)">-</button><span class="qty-val" id="qty-p3">0</span><button class="counter-btn plus" onclick="changeQty('p3', 1)">+</button></div>
+    </div>
+    <div class="product-card" data-id="p4" data-category="coffee" data-name="أمريكانو بلاك" data-price="50">
+        <div class="product-info-wrapper">
+            <img src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=150" alt="أمريكانو بلاك" class="product-img">
+            <div class="product-details"><h4>أمريكانو بلاك</h4><p>50 ج.م</p></div>
+        </div>
+        <div class="counter-box"><button class="counter-btn minus" onclick="changeQty('p4', -1)">-</button><span class="qty-val" id="qty-p4">0</span><button class="counter-btn plus" onclick="changeQty('p4', 1)">+</button></div>
+    </div>
+    <div class="product-card" data-id="p5" data-category="coffee" data-name="سبانيش لاتيه بارد" data-price="75">
+        <div class="product-info-wrapper">
+            <img src="https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=150" alt="سبانيش لاتيه بارد" class="product-img">
+            <div class="product-details"><h4>سبانيش لاتيه بارد</h4><p>75 ج.م</p></div>
+        </div>
+        <div class="counter-box"><button class="counter-btn minus" onclick="changeQty('p5', -1)">-</button><span class="qty-val" id="qty-p5">0</span><button class="counter-btn plus" onclick="changeQty('p5', 1)">+</button></div>
+    </div>
+    <div class="product-card" data-id="p6" data-category="coffee" data-name="آيس كراميل ماكياتو" data-price="80">
+        <div class="product-info-wrapper">
+            <img src="https://images.unsplash.com/photo-1596078841242-12f73dc697c6?w=150" alt="آيس كراميل ماكياتو" class="product-img">
+            <div class="product-details"><h4>آيس كراميل ماكياتو</h4><p>80 ج.م</p></div>
+        </div>
+        <div class="counter-box"><button class="counter-btn minus" onclick="changeQty('p6', -1)">-</button><span class="qty-val" id="qty-p6">0</span><button class="counter-btn plus" onclick="changeQty('p6', 1)">+</button></div>
+    </div>
+    <div class="product-card" data-id="p7" data-category="coffee" data-name="شوكولاتة ساخنة" data-price="55">
+        <div class="product-info-wrapper">
+            <img src="https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=150" alt="شوكولاتة ساخنة" class="product-img">
+            <div class="product-details"><h4>شوكولاتة ساخنة</h4><p>55 ج.م</p></div>
+        </div>
+        <div class="counter-box"><button class="counter-btn minus" onclick="changeQty('p7', -1)">-</button><span class="qty-val" id="qty-p7">0</span><button class="counter-btn plus" onclick="changeQty('p7', 1)">+</button></div>
+    </div>
+    <div class="product-card" data-id="p8" data-category="coffee" data-name="ميكس ترافل شيك" data-price="85">
+        <div class="product-info-wrapper">
+            <img src="https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=150" alt="ميكس ترافل شيك" class="product-img">
+            <div class="product-details"><h4>ميكس ترافل شيك</h4><p>85 ج.م</p></div>
+        </div>
+        <div class="counter-box"><button class="counter-btn minus" onclick="changeQty('p8', -1)">-</button><span class="qty-val" id="qty-p8">0</span><button class="counter-btn plus" onclick="changeQty('p8', 1)">+</button></div>
+    </div>
+    <div class="product-card" data-id="p9" data-category="coffee" data-name="عصير ليمون نعناع" data-price="45">
+        <div class="product-info-wrapper">
+            <img src="https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=150" alt="عصير ليمون نعناع" class="product-img">
+            <div class="product-details"><h4>عصير ليمون نعناع</h4><p>45 ج.م</p></div>
+        </div>
+        <div class="counter-box"><button class="counter-btn minus" onclick="changeQty('p9', -1)">-</button><span class="qty-val" id="qty-p9">0</span><button class="counter-btn plus" onclick="changeQty('p9', 1)">+</button></div>
+    </div>
+    <div class="product-card" data-id="p10" data-category="coffee" data-name="موجيتو بلوبيري" data-price="70">
+        <div class="product-info-wrapper">
+            <img src="https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=150" alt="موجيتو بلوبيري" class="product-img">
+            <div class="product-details"><h4>موجيتو بلوبيري</h4><p>70 ج.م</p></div>
+        </div>
+        <div class="counter-box"><button class="counter-btn minus" onclick="changeQty('p10', -1)">-</button><span class="qty-val" id="qty-p10">0</span><button class="counter-btn plus" onclick="changeQty('p10', 1)">+</button></div>
+    </div>
+
+    <div class="product-card" data-id="p11" data-category="cake" data-name="مولتن كيك شوكولاتة" data-price="90">
+        <div class="product-info-wrapper">
+            <img src="https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=150" alt="مولتن كيك شوكولاتة" class="product-img">
+            <div class="product-details"><h4>مولتن كيك شوكولاتة</h4><p>90 ج.م</p></div>
+        </div>
+        <div class="counter-box"><button class="counter-btn minus" onclick="changeQty('p11', -1)">-</button><span class="qty-val" id="qty-p11">0</span><button class="counter-btn plus" onclick="changeQty('p11', 1)">+</button></div>
+    </div>
+    <div class="product-card" data-id="p12" data-category="cake" data-name="تشيز كيك فريز" data-price="85">
+        <div class="product-info-wrapper">
+            <img src="https://images.unsplash.com/photo-1533134242443-d4fd215305ad?w=150" alt="تشيز كيك فريز" class="product-img">
+            <div class="product-details"><h4>تشيز كيك فريز</h4><p>85 ج.م</p></div>
+        </div>
+        <div class="counter-box"><button class="counter-btn minus" onclick="changeQty('p12', -1)">-</button><span class="qty-val" id="qty-p12">0</span><button class="counter-btn plus" onclick="changeQty('p12', 1)">+</button></div>
+    </div>
+    <div class="product-card" data-id="p13" data-category="cake" data-name="سينابون رول كلاسيك" data-price="70">
+        <div class="product-info-wrapper">
+            <img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?w=150" alt="سينابون رول كلاسيك" class="product-img">
+            <div class="product-details"><h4>سينابون رول كلاسيك</h4><p>70 ج.م</p></div>
+        </div>
+        <div class="counter-box"><button class="counter-btn minus" onclick="changeQty('p13', -1)">-</button><span class="qty-val" id="qty-p13">0</span><button class="counter-btn plus" onclick="changeQty('p13', 1)">+</button></div>
+    </div>
+    <div class="product-card" data-id="p14" data-category="cake" data-name="وافل نوتيلا كامل" data-price="80">
+        <div class="product-info-wrapper">
+            <img src="https://images.unsplash.com/photo-1562376502-6f769499c886?w=150" alt="وافل نوتيلا كامل" class="product-img">
+            <div class="product-details"><h4>وافل نوتيلا كامل</h4><p>80 ج.م</p></div>
+        </div>
+        <div class="counter-box"><button class="counter-btn minus" onclick="changeQty('p14', -1)">-</button><span class="qty-val" id="qty-p14">0</span><button class="counter-btn plus" onclick="changeQty('p14', 1)">+</button></div>
+    </div>
+    <div class="product-card" data-id="p15" data-category="cake" data-name="كب كيك فانيليا" data-price="35">
+        <div class="product-info-wrapper">
+            <img src="https://images.unsplash.com/photo-1587314168485-3236d6710814?w=150" alt="كب كيك فانيليا" class="product-img">
+            <div class="product-details"><h4>كب كيك فانيليا</h4><p>35 ج.م</p></div>
+        </div>
+        <div class="counter-box"><button class="counter-btn minus" onclick="changeQty('p15', -1)">-</button><span class="qty-val" id="qty-p15">0</span><button class="counter-btn plus" onclick="changeQty('p15', 1)">+</button></div>
+    </div>
+    <div class="product-card" data-id="p16" data-category="cake" data-name="كب كيك لوتس دبل" data-price="45">
+        <div class="product-info-wrapper">
+            <img src="https://images.unsplash.com/photo-1576618148400-f54bed99fcfd?w=150" alt="كب كيك لوتس دبل" class="product-img">
+            <div class="product-details"><h4>كب كيك لوتس دبل</h4><p>45 ج.م</p></div>
+        </div>
+        <div class="counter-box"><button class="counter-btn minus" onclick="changeQty('p16', -1)">-</button><span class="qty-val" id="qty-p16">0</span><button class="counter-btn plus" onclick="changeQty('p16', 1)">+</button></div>
+    </div>
+    <div class="product-card" data-id="p17" data-category="cake" data-name="براونيز كيك فادج" data-price="60">
+        <div class="product-info-wrapper">
+            <img src="https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=150" alt="براونيز كيك فادج" class="product-img">
+            <div class="product-details"><h4>براونيز كيك فادج</h4><p>60 ج.م</p></div>
+        </div>
+        <div class="counter-box"><button class="counter-btn minus" onclick="changeQty('p17', -1)">-</button><span class="qty-val" id="qty-p17">0</span><button class="counter-btn plus" onclick="changeQty('p17', 1)">+</button></div>
+    </div>
+    <div class="product-card" data-id="p18" data-category="cake" data-name="تارت ليمون فرنسي" data-price="65">
+        <div class="product-info-wrapper">
+            <img src="https://images.unsplash.com/photo-1519869325930-281384150729?w=150" alt="تارت ليمون فرنسي" class="product-img">
+            <div class="product-details"><h4>تارت ليمون فرنسي</h4><p>65 ج.م</p></div>
+        </div>
+        <div class="counter-box"><button class="counter-btn minus" onclick="changeQty('p18', -1)">-</button><span class="qty-val" id="qty-p18">0</span><button class="counter-btn plus" onclick="changeQty('p18', 1)">+</button></div>
+    </div>
+    <div class="product-card" data-id="p19" data-category="cake" data-name="بان كيك ميكس صوص" data-price="75">
+        <div class="product-info-wrapper">
+            <img src="https://images.unsplash.com/photo-1528207776546-365bb710ee93?w=150" alt="بان كيك ميكس صوص" class="product-img">
+            <div class="product-details"><h4>بان كيك ميكس صوص</h4><p>75 ج.م</p></div>
+        </div>
+        <div class="counter-box"><button class="counter-btn minus" onclick="changeQty('p19', -1)">-</button><span class="qty-val" id="qty-p19">0</span><button class="counter-btn plus" onclick="changeQty('p19', 1)">+</button></div>
+    </div>
+    <div class="product-card" data-id="p20" data-category="cake" data-name="قطعة ريد فيلفيت" data-price="70">
+        <div class="product-info-wrapper">
+            <img src="https://images.unsplash.com/photo-1616541823729-00fe0aacd32c?w=150" alt="قطعة ريد فيلفيت" class="product-img">
+            <div class="product-details"><h4>قطعة ريد فيلفيت</h4><p>70 ج.م</p></div>
+        </div>
+        <div class="counter-box"><button class="counter-btn minus" onclick="changeQty('p20', -1)">-</button><span class="qty-val" id="qty-p20">0</span><button class="counter-btn plus" onclick="changeQty('p20', 1)">+</button></div>
+    </div>
+
+    <div class="product-card" data-id="p21" data-category="sandwich" data-name="سندوتش كلوب دجاج" data-price="85">
+        <div class="product-info-wrapper">
+            <img src="https://images.unsplash.com/photo-1567234669003-dce7a7a88821?w=150" alt="سندوتش كلوب دجاج" class="product-img">
+            <div class="product-details"><h4>سندوتش كلوب دجاج</h4><p>85 ج.م</p></div>
+        </div>
+        <div class="counter-box"><button class="counter-btn minus" onclick="changeQty('p21', -1)">-</button><span class="qty-val" id="qty-p21">0</span><button class="counter-btn plus" onclick="changeQty('p21', 1)">+</button></div>
+    </div>
+    <div class="product-card" data-id="p22" data-category="sandwich" data-name="سندوتش تونة مايونيز" data-price="75">
+        <div class="product-info-wrapper">
+            <img src="https://images.unsplash.com/photo-1509722747041-616f39b57569?w=150" alt="سندوتش تونة مايونيز" class="product-img">
+            <div class="product-details"><h4>سندوتش تونة مايونيز</h4><p>75 ج.م</p></div>
+        </div>
+        <div class="counter-box"><button class="counter-btn minus" onclick="changeQty('p22', -1)">-</button><span class="qty-val" id="qty-p22">0</span><button class="counter-btn plus" onclick="changeQty('p22', 1)">+</button></div>
+    </div>
+    <div class="product-card" data-id="p23" data-category="sandwich" data-name="برجر بقري كلاسيك" data-price="110">
+        <div class="product-info-wrapper">
+            <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=150" alt="برجر بقري كلاسيك" class="product-img">
+            <div class="product-details"><h4>برجر بقري كلاسيك</h4><p>110 ج.م</p></div>
+        </div>
+        <div class="counter-box"><button class="counter-btn minus" onclick="changeQty('p23', -1)">-</button><span class="qty-val" id="qty-p23">0</span><button class="counter-btn plus" onclick="changeQty('p23', 1)">+</button></div>
+    </div>
+
+    <div class="product-card" data-id="p24" data-category="pasta" data-name="باستا وايت صوص دجاج" data-price="120">
+        <div class="product-info-wrapper">
+            <img src="https://images.unsplash.com/photo-1645112411341-6c4fd023714a?w=150" alt="باستا وايت صوص دجاج" class="product-img">
+            <div class="product-details"><h4>باستا وايت صوص دجاج</h4><p>120 ج.م</p></div>
+        </div>
+        <div class="counter-box"><button class="counter-btn minus" onclick="changeQty('p24', -1)">-</button><span class="qty-val" id="qty-p24">0</span><button class="counter-btn plus" onclick="changeQty('p24', 1)">+</button></div>
+    </div>
+    <div class="product-card" data-id="p25" data-category="pasta" data-name="باستا ريد صوص سجق" data-price="115">
+        <div class="product-info-wrapper">
+            <img src="https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=150" alt="باستا ريد صوص سجق" class="product-img">
+            <div class="product-details"><h4>باستا ريد صوص سجق</h4><p>115 ج.م</p></div>
+        </div>
+        <div class="counter-box"><button class="counter-btn minus" onclick="changeQty('p25', -1)">-</button><span class="qty-val" id="qty-p25">0</span><button class="counter-btn plus" onclick="changeQty('p25', 1)">+</button></div>
+    </div>
+
+    <div class="product-card" data-id="p26" data-category="soup" data-name="شوربة كريمة بالدجاج" data-price="55">
+        <div class="product-info-wrapper">
+            <img src="https://images.unsplash.com/photo-1607532941433-304659e8198a?w=150" alt="شوربة كريمة بالدجاج" class="product-img">
+            <div class="product-details"><h4>شوربة كريمة بالدجاج</h4><p>55 ج.م</p></div>
+        </div>
+        <div class="counter-box"><button class="counter-btn minus" onclick="changeQty('p26', -1)">-</button><span class="qty-val" id="qty-p26">0</span><button class="counter-btn plus" onclick="changeQty('p26', 1)">+</button></div>
+    </div>
+    <div class="product-card" data-id="p27" data-category="soup" data-name="شوربة لسان عصفور" data-price="40">
+        <div class="product-info-wrapper">
+            <img src="https://images.unsplash.com/photo-1547592165-e1d17fed6005?w=150" alt="شوربة لسان عصفور" class="product-img">
+            <div class="product-details"><h4>شوربة لسان عصفور</h4><p>40 ج.م</p></div>
+        </div>
+        <div class="counter-box"><button class="counter-btn minus" onclick="changeQty('p27', -1)">-</button><span class="qty-val" id="qty-p27">0</span><button class="counter-btn plus" onclick="changeQty('p27', 1)">+</button></div>
+    </div>
+</div>
+
+<div class="footer-bar">
+    <div>
+        <span style="font-size: 13px; color: var(--text-muted); display: block;">الحساب الإجمالي:</span>
+        <span id="totalPriceDisplay" style="font-size: 20px; font-weight: 800; color: var(--primary-color);">0 ج.م</span>
+    </div>
+    <button class="send-btn" onclick="submitOrder()">إرسال الطلب  🚀</button>
+</div>
+
+<div class="tracking-screen" id="trackingScreen">
+    <h2>☕ تم إرسال طلبك بنجاح!</h2>
+    <p>رقم الأوردر الخاص بك هو: <strong id="orderIdLabel" style="color: var(--accent-color); font-size: 20px;">#0000</strong></p>
+    <div class="status-badge" id="orderStatusLive">قيد الاستلام عند الكاشير... ⏳</div>
+    <p style="color: var(--text-muted); max-width: 300px; font-size: 14px;">يرجى الانتظار في مكانك، وسيتم تقديم طلبك على طاولة <span id="trackingTableNum">0</span> فور تجهيزه!</p>
+    <button class="bill-btn" onclick="requestBill()">💸 اطلب الفاتورة الآن</button>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyDBuBOcY9mbCXZIVIhkTjOhaor4VsrTPx8",
+        authDomain: "scan-order-system.firebaseapp.com",
+        projectId: "scan-order-system",
+        storageBucket: "scan-order-system.firebasestorage.app",
+        messagingSenderId: "1066014113516",
+        appId: "1:1066014113516:web:61ef0f2dc366b0e9d8afc9",
+        databaseURL: "https://scan-order-system-default-rtdb.firebaseio.com"
+    };
+    
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    let branchName = urlParams.get('branch') || "swan_lake";        
+    let tableNumber = null; 
+    let customerName = localStorage.getItem('customerName') || null; 
+
+    document.getElementById('branchDisplay').innerText = "🏢 الفرع: " + branchName;
+
+    const cart = {};
+    for (let i = 1; i <= 27; i++) { cart[`p${i}`] = 0; }
+    let currentOrderNumber = null;
+
+    window.onload = function() {
+        // الفحص الذكي: لو الزبون مسجل قبل كده، بنخفي الخانة ونعرض الترحيب باسمه
+        if (customerName) {
+            document.getElementById('newUserFields').style.display = 'none';
+            document.getElementById('returningUserFields').style.display = 'block';
+            document.getElementById('savedCustomerName').innerText = customerName;
+        } else {
+            document.getElementById('newUserFields').style.display = 'block';
+            document.getElementById('returningUserFields').style.display = 'none';
+        }
+        
+        document.getElementById('tableModal').style.display = 'flex';
+
+        const savedOrder = localStorage.getItem('activeOrderId');
+        if (savedOrder) {
+            currentOrderNumber = savedOrder;
+            const savedTable = localStorage.getItem('activeTableNum');
+            if(savedTable) tableNumber = savedTable;
+            showTrackingScreen(savedOrder);
+            trackOrderStatusLive(savedOrder);
+        }
+    }
+
+    function saveCustomerData() {
+        let nameVal = customerName; // لو متسجل جاهز بناخده من الـ LocalStorage
+
+        // لو مش متسجل زبون قديم، بنقرأ القيمة اللي كتبها في الخانة لأول مرة
+        if (!nameVal) {
+            nameVal = document.getElementById('userNameInput').value.trim();
+            if (nameVal.length < 3) {
+                alert("من فضلك اكتب اسمك الثنائي بشكل صحيح لبدء الطلب.");
+                return;
+            }
+        }
+        
+        const tableVal = parseInt(document.getElementById('tableInput').value);
+        if (!tableVal || tableVal < 1 || tableVal > 50) {
+            alert("من فضلك أدخل رقم طاولة صحيح من 1 إلى 50.");
+            return;
+        }
+        
+        // حفظ واستبقاء البيانات في الـ LocalStorage
+        customerName = nameVal;
+        tableNumber = tableVal;
+        localStorage.setItem('customerName', customerName);
+        localStorage.setItem('activeTableNum', tableNumber);
+        
+        // إخفاء الـ Modal وتحديث بيانات البار
+        document.getElementById('tableModal').style.display = 'none';
+        document.getElementById('tableDisplay').innerText = `📌 طاولة: ${tableNumber} (${customerName})`;
+    }
+
+    function changeQty(id, change) {
+        let currentQty = cart[id] || 0;
+        currentQty += change;
+        if (currentQty < 0) currentQty = 0;
+        cart[id] = currentQty;
+        document.getElementById(`qty-${id}`).innerText = currentQty;
+        calculateTotal();
+    }
+
+    function calculateTotal() {
+        let total = 0;
+        document.querySelectorAll('.product-card').forEach(card => {
+            const id = card.getAttribute('data-id');
+            const price = parseInt(card.getAttribute('data-price'));
+            const qty = cart[id] || 0;
+            total += (price * qty);
+        });
+        document.getElementById('totalPriceDisplay').innerText = total + " ج.م";
+    }
+
+    function filterCategory(category, btnElement) {
+        document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+        if(btnElement) btnElement.classList.add('active');
+
+        document.querySelectorAll('.product-card').forEach(card => {
+            if (category === 'all' || card.getAttribute('data-category') === category) {
+                card.style.display = 'flex';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+
+    function submitOrder() {
+        if (!tableNumber || !customerName) {
+            alert("يرجى إدخال رقم الطاولة والاسم أولاً.");
+            return;
+        }
+
+        const orderItems = [];
+        let total = 0;
+        document.querySelectorAll('.product-card').forEach(card => {
+            const id = card.getAttribute('data-id');
+            const name = card.getAttribute('data-name');
+            const price = parseInt(card.getAttribute('data-price'));
+            const qty = cart[id] || 0;
+            if (qty > 0) {
+                orderItems.push({ id: id, name: name, price: price, qty: qty });
+                total += (price * qty);
+            }
+        });
+
+        if (orderItems.length === 0) {
+            alert("سلتك فارغة! أضف بعض الأصناف أولاً ☕🍔🍝");
+            return;
+        }
+
+        const rawRandomNum = Math.floor(1000 + Math.random() * 9000);
+        currentOrderNumber = rawRandomNum.toString();
+        
+        localStorage.setItem('activeOrderId', currentOrderNumber);
+        localStorage.setItem('activeTableNum', tableNumber);
+
+        const orderData = {
+            orderId: currentOrderNumber,
+            tableNum: tableNumber,
+            customerName: customerName, 
+            branch: branchName,
+            items: orderItems,
+            totalPrice: total,
+            status: "قيد الاستلام",
+            billRequested: false,
+            timestamp: Date.now(),
+            time: new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })
+        };
+
+        const updates = {};
+        updates['orders/' + currentOrderNumber] = orderData;
+        updates['branches/' + branchName + '/orders/' + currentOrderNumber] = orderData;
+        updates['orders/ORD-' + currentOrderNumber] = orderData;
+        updates['branches/' + branchName + '/orders/ORD-' + currentOrderNumber] = orderData;
+        updates['branches/' + branchName + '/tables/' + tableNumber] = { status: "occupied", currentOrder: currentOrderNumber };
+
+        database.ref().update(updates)
+        .then(() => {
+            showTrackingScreen(currentOrderNumber);
+            trackOrderStatusLive(currentOrderNumber);
+        })
+        .catch(error => { alert("حدث خطأ في الشبكة، يرجى المحاولة مرة أخرى."); });
+    }
+
+    function showTrackingScreen(orderId) {
+        document.getElementById('trackingScreen').style.display = 'flex';
+        document.getElementById('orderIdLabel').innerText = "#" + orderId;
+        document.getElementById('trackingTableNum').innerText = tableNumber;
+    }
+
+    function trackOrderStatusLive(orderId) {
+        const orderRef = database.ref('branches/' + branchName + '/orders/' + orderId);
+        orderRef.on('value', (snapshot) => {
+            let order = snapshot.val();
+            if(!order) {
+                database.ref('branches/' + branchName + '/orders/ORD-' + orderId).once('value', (snapORD) => {
+                    order = snapORD.val();
+                    if(order) {
+                        updateUIStatus(order);
+                    } else {
+                        handleOrderFinished();
+                    }
+                });
+            } else {
+                updateUIStatus(order);
+            }
+        });
+    }
+
+    function updateUIStatus(order) {
+        document.getElementById('orderStatusLive').innerText = "الحالة الحالية: " + order.status;
+        if(order.billRequested) {
+            document.getElementById('orderStatusLive').innerText = "جاري تحضير الفاتورة... 💸";
+        }
+    }
+
+    function handleOrderFinished() {
+        localStorage.removeItem('activeOrderId');
+        localStorage.removeItem('activeTableNum');
+        alert("شكراً لزيارتك لـ CAKE & CAFE! تم إخلاء الطاولة وتسوية الحساب بنجاح 👋✨");
+        location.reload();
+    }
+
+    function requestBill() {
+        if (!currentOrderNumber) return;
+        if (confirm("هل تريد طلب الفاتورة الآن لإخلاء الطاولة?")) {
+            const updates = {};
+            updates['orders/' + currentOrderNumber + '/billRequested'] = true;
+            updates['branches/' + branchName + '/orders/' + currentOrderNumber + '/billRequested'] = true;
+            updates['orders/ORD-' + currentOrderNumber + '/billRequested'] = true;
+            updates['branches/' + branchName + '/orders/ORD-' + currentOrderNumber + '/billRequested'] = true;
+            
+            database.ref().update(updates).then(() => {
+                document.getElementById('orderStatusLive').innerText = "جاري تحضير الفاتورة... 💸";
+            });
+        }
+    }
+</script>
+</body>
+</html>
