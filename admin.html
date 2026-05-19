@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CAKE & CAFE - نظام التحكم الملكي في الوردية</title>
+    <title>CAKE & CAFE - نظام التحكم الملكي المعزول</title>
     <style>
         :root {
             --bg-deep: #050811;
@@ -126,6 +126,7 @@
         .rank-tag-badge { font-size: 11px; padding: 6px 14px; border-radius: 10px; font-weight: 800; display: inline-block; }
         .rank-tag-badge.silver { background: linear-gradient(135deg, #e2e8f0, #94a3b8); color: #0f172a; }
         .rank-tag-badge.gold { background: linear-gradient(135deg, #f39c12, #ffd700); color: #000; }
+        .branch-identity-badge { font-size: 11px; background: rgba(0, 210, 255, 0.12); color: var(--neon-blue); border: 1px solid rgba(0,210,255,0.2); padding: 4px 10px; border-radius: 8px; font-weight: bold; margin-top: 4px; display: inline-block; }
 
         .bill-alert-neon {
             background: linear-gradient(90deg, #ff3838, #b31010); color: white; text-align: center;
@@ -150,14 +151,14 @@
         .btn-panel-action.done-prep { background: var(--neon-green); color: #000; }
         .btn-panel-action.done-cash { background: var(--neon-red); color: white; }
 
-        /* 🎰 الأدرج الجانبية */
+        /* 🎰 الأدراج الجانبية */
         .premium-drawer {
-            position: fixed; top: 0; width: 370px; height: 100%; background: rgba(10, 15, 28, 0.85); box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            position: fixed; top: 0; width: 390px; height: 100%; background: rgba(10, 15, 28, 0.85); box-shadow: 0 0 50px rgba(0,0,0,0.8);
             z-index: 9999; padding: 35px 30px; overflow-y: auto; border: 1px solid rgba(255, 255, 255, 0.03); color: white; backdrop-filter: blur(25px);
         }
-        #financeDrawer { right: -390px; border-left: 2px solid var(--gold-pure); }
+        #financeDrawer { right: -410px; border-left: 2px solid var(--gold-pure); }
         #financeDrawer.open { right: 0; }
-        #reportsDrawer { left: -390px; border-right: 2px solid var(--neon-blue); }
+        #reportsDrawer { left: -410px; border-right: 2px solid var(--neon-blue); }
         #reportsDrawer.open { left: 0; }
 
         .drawer-header-top { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid rgba(255,255,255,0.05); padding-bottom: 20px; margin-bottom: 30px; }
@@ -182,7 +183,7 @@
 
 <div class="login-overlay" id="loginOverlay">
     <div class="login-box">
-        <h3>👑 نظام الإدارة المالية والتشغيلية</h3>
+        <h3>👑 نظام الإدارة المالية والتشغيلية المطور</h3>
         <input type="email" id="emailInput" class="login-input" placeholder="أدخل البريد الإلكتروني المسجل">
         <input type="password" id="passwordInput" class="login-input" placeholder="أدخل كلمة المرور">
         <button class="btn-login" id="loginBtn" onclick="loginWithFirebase()">دخول النظام الملكي</button>
@@ -192,7 +193,7 @@
 
 <div class="premium-drawer" id="financeDrawer">
     <div class="drawer-header-top">
-        <h3 style="margin:0; font-weight:900; color:var(--gold-glow); font-size: 20px;">📊 الحسابات والإيرادات</h3>
+        <h3 id="financeDrawerTitle" style="margin:0; font-weight:900; color:var(--gold-glow); font-size: 19px;">📊 الحسابات والإيرادات</h3>
         <button class="btn-close-x" onclick="toggleFinanceDrawer(false)">×</button>
     </div>
     
@@ -203,20 +204,20 @@
         </div>
         
         <div class="top-item-badge-box">
-            <p style="margin:0 0 6px 0; font-size:12px; font-weight:bold; color:var(--text-secondary);">🔥 الأكثر طلباً this الشيفت</p>
+            <p style="margin:0 0 6px 0; font-size:12px; font-weight:bold; color:var(--text-secondary);">🔥 الأكثر طلباً هذا الشيفت</p>
             <strong id="topShiftItemField" style="font-size:15px; color:var(--gold-glow);">جاري التحليل... 📊</strong>
         </div>
 
         <div class="sub-matrix-card" style="border-right: 4px solid var(--gold-pure);">
-            <p>إجمالي اليوم كلو (كل الشيفتات) 📅</p>
+            <p>إجمالي اليوم كلو (بالفرع المحدد) 📅</p>
             <h3 id="dailyRevenueField" style="color: var(--gold-glow);">0 ج.م</h3>
         </div>
         <div class="sub-matrix-card" style="border-right: 4px solid var(--neon-green);">
-            <p>المبيعات الأسبوعية (آخر 7 أيام) 📊</p>
+            <p>المبيعات الأسبوعية للفرع 📊</p>
             <h3 id="weeklyRevenueField" style="color: var(--neon-green);">0 ج.م</h3>
         </div>
         <div class="sub-matrix-card" style="border-right: 4px solid #9b59b6;">
-            <p>الحصيلة الشهرية الكلية 💰</p>
+            <p>الحصيلة الشهرية للفرع 💰</p>
             <h3 id="monthlyRevenueField" style="color: #af7ac5;">0 ج.م</h3>
         </div>
     </div>
@@ -224,12 +225,12 @@
 
 <div class="premium-drawer" id="reportsDrawer">
     <div class="drawer-header-top">
-        <h3 style="margin:0; font-weight:900; color:var(--neon-blue); font-size: 20px;">🏅 قائمة ومزاج العملاء</h3>
+        <h3 style="margin:0; font-weight:900; color:var(--neon-blue); font-size: 19px;">🏅 قائمة ومزاج العملاء</h3>
         <button class="btn-close-x" onclick="toggleReportsDrawer(false)">×</button>
     </div>
     <table class="side-table">
         <thead>
-            <tr><th>👤 العميل / المزاج المفضل</th><th style="text-align:center;">📦 طلبات</th><th>🏅 الرتبة</th></tr>
+            <tr><th>👤 العميل / المزاج المفضل</th><th style="text-align:center;">📦 طلبات</th><th>🏅 الرتبة والفرع</th></tr>
         </thead>
         <tbody id="customersTableBody">
             <tr><td colspan="3" style="text-align:center; color:var(--text-secondary);">جاري استرجاع البيانات الحية...</td></tr>
@@ -289,131 +290,70 @@
 
     let localOrdersCounter = 0;
     let globalActiveOrders = {};
-    let customersDataMap = {};
     let currentShiftGlobalString = "صباحي"; 
     
-    // متغيرات الصلاحيات العالمية
     let currentUserRole = "cashier";
     let currentUserBranch = "main";
 
-    // 📡 الحارس الحي الفعلي لجلسة المستخدم (Firebase Auth Observer)
+    // 📡 الحارس الحي الفعلي لجلسة المستخدم
     auth.onAuthStateChanged((user) => {
         if (user) {
-            // 🔍 خطوة الصياعة: بنروح للفايربيز نسأله عن صلاحية وفرع الـ UID ده حياً قبل فتح الصفحة
             database.ref('users/' + user.uid).once('value', (snapshot) => {
                 const userData = snapshot.val();
                 
                 if (userData) {
-                    currentUserRole = userData.role; // رتبته (super_admin أو cashier)
+                    currentUserRole = userData.role; 
                     
                     if (currentUserRole === "super_admin") {
-                        // 👑 لو المدير العام: بنسيب له قائمة الفروع ظاهرة ويقلب براحته
                         document.getElementById('branchSelect').style.display = "inline-block";
                         document.querySelector('.header-title-crypto').innerText = `CAKE & CAFE — لوحة الإدارة العامة`;
                     } else {
-                        // 💳 لو كاشير فرع: بنخفي قائمة اختيار الفروع تماماً عشان ميعرفش يتنقل!
                         document.getElementById('branchSelect').style.display = "none";
-                        
-                        // بنثبت قيمة القائمة على الفرع بتاعه الإجباري المسجل في الفايربيز
                         currentUserBranch = userData.branch || "main";
                         document.getElementById('branchSelect').value = currentUserBranch;
-                        
-                        // تحديث العنوان باسم الفرع بتاعه
                         document.querySelector('.header-title-crypto').innerText = `CAKE & CAFE — لوحة فرع: ${currentUserBranch}`;
                     }
 
-                    // إظهار اللوحة وإخفاء شاشة الدخول
                     document.getElementById('loginOverlay').style.display = "none";
                     document.getElementById('adminMainWrapper').style.display = "block";
                     
-                    // تشغيل المزامنة الحية
-                    loadInitialCustomerMetrics();
+                    // تشغيل المزامنة والربط مباشرة
+                    loadInitialShiftConfig();
                 } else {
-                    // لو الحساب مش مسجل له داتا صلاحيات في الداتابيز
-                    alert("⚠️ حسابك مسجل في الـ Auth ولكن رتبتك وفروعك غير مدرجة في الداتابيز (عقدة users)!");
+                    alert("⚠️ صلاحياتك غير مدرجة في الداتابيز (عقدة users)!");
                     auth.signOut();
                 }
             });
         } else {
-            // لو مش مسجل دخول أو عمل Logout، نقفل اللوحة فوراً ونعرض شاشة الـ Login
             document.getElementById('adminMainWrapper').style.display = "none";
             document.getElementById('loginOverlay').style.display = "flex";
             stopLiveListeners();
         }
     });
 
-    // دالة لتوقيف المستمعين عند الخروج لضمان عدم تسريب البيانات
     function stopLiveListeners() {
-        database.ref('customers').off();
         const branch = document.getElementById('branchSelect').value;
         database.ref('branches/' + branch + '/checkpoints/current_active_shift').off();
         database.ref('branches/' + branch + '/archive').off();
         database.ref('branches/' + branch + '/orders').off();
+        database.ref('branches/' + branch + '/customers').off();
+        database.ref('branches/main/customers').off();
+        database.ref('branches/swan_lake/customers').off();
+        database.ref('branches/pyramids/customers').off();
     }
 
-    // 🔑 دالة تسجيل الدخول الحقيقية عن طريق الفايربيز سيرفر
-    function loginWithFirebase() {
-        const email = document.getElementById('emailInput').value.trim();
-        const password = document.getElementById('passwordInput').value.trim();
-        const errorMsg = document.getElementById('loginErrorMsg');
-        const loginBtn = document.getElementById('loginBtn');
-
-        if (!email || !password) {
-            errorMsg.innerText = "برجاء كتابة الإيميل والباسورد أولاً! ⚠️";
-            errorMsg.style.display = "block";
-            return;
-        }
-
-        loginBtn.innerText = "جاري التحقق ... 🔄";
-        loginBtn.disabled = true;
-
-        auth.signInWithEmailAndPassword(email, password)
-        .then((userCredential) => {
-            errorMsg.style.display = "none";
-            loginBtn.innerText = "دخول النظام الملكي";
-            loginBtn.disabled = false;
-        })
-        .catch((error) => {
-            console.error("Firebase Auth Error:", error.message);
-            errorMsg.innerText = "خطأ في بيانات الدخول! تأكد من الإيميل والباسورد ❌";
-            errorMsg.style.display = "block";
-            loginBtn.innerText = "دخول النظام الملوكي";
-            loginBtn.disabled = false;
-        });
-    }
-
-    // 🚪 دالة تسجيل الخروج الفعلي من الفايربيز (Firebase SignOut)
-    function logoutFromFirebaseMaster() {
-        if(confirm("هل تريد تسجيل الخروج الحقيقي وإنهاء جلسة العمل الحالية؟ 🚪")) {
-            auth.signOut().then(() => {
-                alert("تم تسجيل الخروج وتأمين لوحة التحكم بنجاح! 👋");
-            }).catch((error) => {
-                alert("حدث خطأ أثناء تسجيل الخروج: " + error.message);
-            });
-        }
-    }
-
-    function loadInitialCustomerMetrics() {
-        // فك أي مستمع قديم قبل البدء لمنع التداخل
-        database.ref('customers').off();
+    function loadInitialShiftConfig() {
+        const branch = document.getElementById('branchSelect').value;
+        database.ref('branches/' + branch + '/checkpoints/current_active_shift').off();
         
-        database.ref('customers').on('value', (snapshot) => {
-            customersDataMap = snapshot.val() || {};
-            
-            const branch = document.getElementById('branchSelect').value;
-            
-            // إلغاء مستمع الشفت القديم لو موجود
-            database.ref('branches/' + branch + '/checkpoints/current_active_shift').off();
-            
-            database.ref('branches/' + branch + '/checkpoints/current_active_shift').on('value', (shiftSnap) => {
-                if(shiftSnap.exists()) {
-                    currentShiftGlobalString = shiftSnap.val();
-                } else {
-                    currentShiftGlobalString = "صباحي";
-                }
-                updateShiftUIOnly();
-                loadOrdersAndFinancialsLive();
-            });
+        database.ref('branches/' + branch + '/checkpoints/current_active_shift').on('value', (shiftSnap) => {
+            if(shiftSnap.exists()) {
+                currentShiftGlobalString = shiftSnap.val();
+            } else {
+                currentShiftGlobalString = "صباحي";
+            }
+            updateShiftUIOnly();
+            loadOrdersAndFinancialsLive();
         });
     }
 
@@ -432,10 +372,10 @@
         const branch = document.getElementById('branchSelect').value;
         const targetShift = (currentShiftGlobalString === "صباحي") ? "مسائي" : "صباحي";
         
-        let confirmMsg = `🔄 هل تريد إغلاق الوردية الـ (${currentShiftGlobalString}) وتلسيم العهدة للوردية الـ (${targetShift})؟`;
+        let confirmMsg = `🔄 هل تريد إغلاق الوردية الـ (${currentShiftGlobalString}) وتلسيم العهدة لفرع [ ${branch} ]؟`;
         
         if(currentShiftGlobalString === "مسائي" && targetShift === "صباحي") {
-            confirmMsg += `\n\n⚠️ انتبه يا فنان: بما أنك تنقل من (مسائي ⬅️ صباحي)، فهذا يعني نهاية يوم العمل بالكامل! السيستم هيصفر "إجمالي اليوم كلو" فوراً لبدء يوم جديد ونظيف.`;
+            confirmMsg += `\n\n⚠️ تذكير: الانتقال لليوم التالي يصفر مبيعات اليوم للفرع الحالي فقط!`;
         }
 
         if(confirm(confirmMsg)) {
@@ -450,25 +390,36 @@
             }
 
             database.ref().update(updates).then(() => {
-                alert(`🚀 تم ترحيل الوردية بنجاح بنظام الكافيهات المطور!\nالوردية الوشيكة الآن: ${targetShift === "صباحي" ? "☀️ صباحي" : "🌙 مسائي"}`);
+                alert(`🚀 تم ترحيل الوردية للفرع الحالي بنجاح!`);
             });
         }
     }
 
     function loadOrdersAndFinancialsLive() {
-        const branch = document.getElementById('branchSelect').value;
+        const selectedBranch = document.getElementById('branchSelect').value;
         
-        // تنظيف المستمعين للفروع القديمة قبل ربط الجديدة
-        database.ref('branches/' + branch + '/archive').off();
-        database.ref('branches/' + branch + '/orders').off();
-        
-        database.ref('branches/' + branch + '/archive').on('value', (snapshot) => {
+        // تحديث المسميات في واجهة الحسابات للتفصيل
+        document.getElementById('financeDrawerTitle').innerText = `📊 حسابات فرع: ${selectedBranch.toUpperCase()}`;
+
+        // إيقاف مستمعين الأرشيف والأوردرات القديمة
+        database.ref('branches/main/orders').off();
+        database.ref('branches/swan_lake/orders').off();
+        database.ref('branches/pyramids/orders').off();
+        database.ref('branches/main/archive').off();
+        database.ref('branches/swan_lake/archive').off();
+        database.ref('branches/pyramids/archive').off();
+
+        // ربط مستمع الأرشيف للفرع المحدد لحساب الماليات المفصلة
+        database.ref('branches/' + selectedBranch + '/archive').on('value', (snapshot) => {
             const archiveData = snapshot.val() || {};
-            calculateFinancialDashboard(archiveData, branch);
-            calculateCustomerPreferences(archiveData);
+            calculateFinancialDashboard(archiveData, selectedBranch);
         });
 
-        database.ref('branches/' + branch + '/orders').on('value', (snapshot) => {
+        // تشغيل مستمع قاعدة البيانات للعملاء مع ميزة العزل الذكي
+        syncCustomersDatabaseLive(selectedBranch);
+
+        // ربط مستمع الأوردرات النشطة للفرع المحدد
+        database.ref('branches/' + selectedBranch + '/orders').on('value', (snapshot) => {
             const container = document.getElementById('ordersGridContainer');
             container.innerHTML = "";
 
@@ -482,7 +433,7 @@
             localOrdersCounter = count;
 
             if(count === 0) {
-                container.innerHTML = `<p style="text-align: center; grid-column: 1/-1; color: var(--text-secondary); padding: 60px; font-weight: bold; font-size:15px;">🪑 لا يوجد أوردرات نشطة في الصالة حالياً.</p>`;
+                container.innerHTML = `<p style="text-align: center; grid-column: 1/-1; color: var(--text-secondary); padding: 60px; font-weight: bold; font-size:15px;">🪑 لا يوجد أوردرات نشطة في صالة ${selectedBranch} حالياً.</p>`;
                 return;
             }
 
@@ -508,22 +459,9 @@
 
                 const card = document.createElement('div');
                 let cName = order.customerName || "زبون عابر";
-                let totalVisits = 1;
-                if(customersDataMap[cName]) {
-                    totalVisits = customersDataMap[cName].totalOrders || 1;
-                }
 
-                let badgeHtml = "";
-                if(totalVisits >= 10) {
-                    card.className = "order-card-flexible gold-member";
-                    badgeHtml = `<span class="rank-tag-badge gold">👑 ذهبي ملكي (${totalVisits} طلب)</span>`;
-                } else if(totalVisits >= 5) {
-                    card.className = "order-card-flexible silver-member";
-                    badgeHtml = `<span class="rank-tag-badge silver">🥈 فضي فخم (${totalVisits} طلب)</span>`;
-                } else {
-                    card.className = "order-card-flexible";
-                    badgeHtml = `<span class="rank-tag-badge" style="background:#131e36; color:#fff;">👤 عميل جديد</span>`;
-                }
+                card.className = "order-card-flexible";
+                let badgeHtml = `<span class="rank-tag-badge" style="background:#131e36; color:#fff;">👤 عميل صالة</span>`;
 
                 let billBanner = order.billRequested ? `<div class="bill-alert-neon">💸 العميل يطلب الفاتورة الحية الآن!</div>` : '';
                 let oTime = order.time || 'الآن';
@@ -533,7 +471,7 @@
                         ${billBanner}
                         <div class="card-row-top">
                             <span class="table-headline">🪑 طاولة ${order.tableNum || '??'}</span>
-                            <span class="order-token-style">رقم الأوردر #${realId}</span>
+                            <span class="order-token-style">${selectedBranch.toUpperCase()}</span>
                         </div>
                         <div class="info-line">👤 الاسم: <strong>${cName}</strong> ${badgeHtml}</div>
                         <div class="info-line">🕒 الوقت: <strong>${oTime}</strong></div>
@@ -547,8 +485,8 @@
                     <div>
                         <div class="total-bill-row">صافي الحساب: ${order.totalPrice || 0} ج.م</div>
                         <div class="dual-buttons-row">
-                            <button class="btn-panel-action done-prep" onclick="markOrderReady('${branch}', '${key}')">✔ تم الاستلام</button>
-                            <button class="btn-panel-action done-cash" onclick="liquidateOrderFinal('${branch}', '${key}')">💸 تم الحساب</button>
+                            <button class="btn-panel-action done-prep" onclick="markOrderReady('${selectedBranch}', '${key}')">✔ تم الاستلام</button>
+                            <button class="btn-panel-action done-cash" onclick="liquidateOrderFinal('${selectedBranch}', '${key}')">💸 تم الحساب</button>
                         </div>
                     </div>
                 `;
@@ -562,7 +500,6 @@
         let dailyTotal = 0;
         let weeklyTotal = 0;
         let monthlyTotal = 0;
-
         let shiftItemsMap = {};
 
         const now = new Date();
@@ -589,10 +526,7 @@
                     }
                 }
                 
-                if(timestamp >= lastDailyCheck) {
-                    dailyTotal += price;
-                }
-                
+                if(timestamp >= lastDailyCheck) dailyTotal += price;
                 if(timestamp >= startOfWeekly) weeklyTotal += price;
                 if(timestamp >= startOfMonthly) monthlyTotal += price;
             });
@@ -602,7 +536,7 @@
             document.getElementById('weeklyRevenueField').innerText = weeklyTotal + " ج.م";
             document.getElementById('monthlyRevenueField').innerText = monthlyTotal + " ج.م";
 
-            let topItemName = "لا مبيعات بالشيفت";
+            let topItemName = "لا مبيعات";
             let maxQty = 0;
             Object.keys(shiftItemsMap).forEach(name => {
                 if(shiftItemsMap[name] > maxQty) {
@@ -614,61 +548,74 @@
         });
     }
 
-    function calculateCustomerPreferences(archive) {
-        let customerFavMap = {};
-
-        Object.keys(archive).forEach(k => {
-            const rec = archive[k];
-            const cName = rec.customerName || "زبون عابر";
-            if(cName === "زبون عابر") return;
-
-            if(!customerFavMap[cName]) customerFavMap[cName] = {};
-
-            if(rec.items && Array.isArray(rec.items)) {
-                rec.items.forEach(it => {
-                    customerFavMap[cName][it.name] = (customerFavMap[cName][it.name] || 0) + parseInt(it.qty || 1);
-                });
-            }
-        });
+    // 👤 دالة إدارة ومزامنة العملاء بالعزل والتفصيل التام
+    function syncCustomersDatabaseLive(selectedBranch) {
+        database.ref('branches/main/customers').off();
+        database.ref('branches/swan_lake/customers').off();
+        database.ref('branches/pyramids/customers').off();
 
         const tbody = document.getElementById('customersTableBody');
         tbody.innerHTML = "";
 
-        const keys = Object.keys(customersDataMap);
-        if(keys.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:var(--text-secondary);">لا يوجد عملاء مسجلين حالياً.</td></tr>`;
-            return;
-        }
+        if (currentUserRole === "super_admin") {
+            // 👑 الأدمن يشوف كل الفروع متفصلة وجنب كل واحد اسم فرعه
+            let allBranchesData = { main: {}, swan_lake: {}, pyramids: {} };
+            let completedCounter = 0;
 
-        keys.forEach(name => {
-            const c = customersDataMap[name];
-            const total = c.totalOrders || 1;
-            
-            let favoriteItem = "تذوق أولي جديد ☕";
-            let maxCount = 0;
-            if(customerFavMap[name]) {
-                Object.keys(customerFavMap[name]).forEach(prod => {
-                    if(customerFavMap[name][prod] > maxCount) {
-                        maxCount = customerFavMap[name][prod];
-                        favoriteItem = prod;
-                    }
+            const renderAdminReport = () => {
+                tbody.innerHTML = "";
+                let hasData = false;
+
+                Object.keys(allBranchesData).forEach(bName => {
+                    Object.keys(allBranchesData[bName]).forEach(cName => {
+                        hasData = true;
+                        const cData = allBranchesData[bName][cName];
+                        const total = cData.totalOrders || 1;
+
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>👤 <strong>${cName}</strong><span class="fav-food-text">آخر زيارة: ${cData.lastVisit || 'غير مسجلة'}</span></td>
+                                <td style="text-align:center; font-weight:bold; color:var(--neon-blue);">${total}</td>
+                                <td><span class="branch-identity-badge">🏢 فرع: ${bName.toUpperCase()}</span></td>
+                            </tr>`;
+                    });
                 });
-            }
 
-            let levelBadge = `<span style="color:var(--text-secondary); font-weight:bold;">عادي</span>`;
-            if(total >= 10) levelBadge = `<strong style="color:var(--gold-glow)">👑 دهبي ملكي</strong>`;
-            else if(total >= 5) levelBadge = `<strong style="color:#bdc3c7">🥈 فضي فخم</strong>`;
+                if(!hasData) {
+                    tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:var(--text-secondary);">لا يوجد عملاء مسجلين في أي فرع حتى الآن.</td></tr>`;
+                }
+            };
 
-            tbody.innerHTML += `
-                <tr>
-                    <td>
-                        👤 <strong>${name}</strong>
-                        <span class="fav-food-text">❤️ المفضل: ${favoriteItem}</span>
-                    </td>
-                    <td style="text-align:center; font-weight:bold; color:var(--neon-blue); font-size:14px;">${total}</td>
-                    <td>${levelBadge}</td>
-                </tr>`;
-        });
+            ['main', 'swan_lake', 'pyramids'].forEach(bKey => {
+                database.ref(`branches/${bKey}/customers`).on('value', (snap) => {
+                    allBranchesData[bKey] = snap.val() || {};
+                    renderAdminReport();
+                });
+            });
+
+        } else {
+            // 💳 الكاشير فرعه الخاص فقط وميقدرش يشوف عملاء غيره نهائياً
+            database.ref(`branches/${selectedBranch}/customers`).on('value', (snap) => {
+                tbody.innerHTML = "";
+                const branchCustomers = snap.val() || {};
+                const keys = Object.keys(branchCustomers);
+
+                if(keys.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:var(--text-secondary);">لا يوجد عملاء مسجلين لفرعك حالياً.</td></tr>`;
+                    return;
+                }
+
+                keys.forEach(cName => {
+                    const cData = branchCustomers[cName];
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>👤 <strong>${cName}</strong><span class="fav-food-text">آخر زيارة: ${cData.lastVisit || 'غير مسجلة'}</span></td>
+                            <td style="text-align:center; font-weight:bold; color:var(--neon-blue);">${cData.totalOrders || 1}</td>
+                            <td><span class="branch-identity-badge">🔒 خاص بفرعك</span></td>
+                        </tr>`;
+                });
+            });
+        }
     }
 
     function markOrderReady(branch, firebaseKey) {
@@ -686,7 +633,7 @@
         updates['branches/' + branch + '/orders/ORD-' + cleanId + '/status'] = statusText;
 
         database.ref().update(updates).then(() => {
-            alert("تم إرسال إشارة جاهزية الأوردر للزبون في الصالة! ✔");
+            alert("تم إرسال إشارة الجاهزية للزبون بنجاح! ✔");
         });
     }
 
@@ -698,7 +645,7 @@
         const cleanOrderId = orderData.orderId || firebaseKey;
         const cName = orderData.customerName || "زبون عابر";
 
-        if(confirm(`هل تم استلام كامل المبلغ (${orderData.totalPrice} ج.م) لطاولة رقم ${tNum} وتريد ترحيل الأوردر？`)) {
+        if(confirm(`هل تم استلام كامل المبلغ (${orderData.totalPrice} ج.م) لطاولة رقم ${tNum}؟`)) {
             
             database.ref('orders/' + firebaseKey).remove();
             database.ref('orders/' + cleanOrderId).remove();
@@ -713,12 +660,13 @@
                 });
             }
 
+            // 🎯 تحديث بيانات وحصيلة الزيارات للعميل داخل شجرة الفرع الخاص به (المعزول)
             if(cName !== "زبون عابر") {
-                const customerRef = database.ref('customers/' + cName);
-                customerRef.once('value').then((snap) => {
+                const branchCustomerRef = database.ref(`branches/${branch}/customers/${cName}`);
+                branchCustomerRef.once('value').then((snap) => {
                     let cInfo = snap.val() || { totalOrders: 0 };
                     let currentCount = parseInt(cInfo.totalOrders || 0) + 1;
-                    customerRef.set({
+                    branchCustomerRef.set({
                         totalOrders: currentCount,
                         lastVisit: new Date().toLocaleDateString('ar-EG') + " " + new Date().toLocaleTimeString('ar-EG')
                     });
@@ -735,7 +683,41 @@
                 timestamp: firebase.database.ServerValue.TIMESTAMP
             });
 
-            alert(`تم الحساب وإخلاء الطاولة رقم ${tNum} بنجاح، وترحيل الأرباح للتحليلات الذكية! 💸🪑`);
+            alert(`تم الحساب وإخلاء الطاولة رقم ${tNum} بنجاح! 💸`);
+        }
+    }
+
+    function loginWithFirebase() {
+        const email = document.getElementById('emailInput').value.trim();
+        const password = document.getElementById('passwordInput').value.trim();
+        const errorMsg = document.getElementById('loginErrorMsg');
+        const loginBtn = document.getElementById('loginBtn');
+
+        if (!email || !password) {
+            errorMsg.innerText = "برجاء كتابة الإيميل والباسورد أولاً! ⚠️";
+            errorMsg.style.display = "block";
+            return;
+        }
+
+        loginBtn.innerText = "جاري التحقق ... 🔄";
+        loginBtn.disabled = true;
+
+        auth.signInWithEmailAndPassword(email, password)
+        .then(() => {
+            errorMsg.style.display = "none";
+            loginBtn.innerText = "دخول النظام الملكي";
+            loginBtn.disabled = false;
+        })
+        .catch((error) => {
+            errorMsg.style.display = "block";
+            loginBtn.innerText = "دخول النظام الملكي";
+            loginBtn.disabled = false;
+        });
+    }
+
+    function logoutFromFirebaseMaster() {
+        if(confirm("هل تريد تسجيل الخروج؟ 🚪")) {
+            auth.signOut();
         }
     }
 
